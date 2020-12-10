@@ -1,5 +1,9 @@
 # Datadog changelog
 
+## 2.6.5
+
+* Remove the cluster-id configmap mount for process-agent
+
 ## 2.6.4
 
 * Fix agent container volumeMounts when oom kill check or tcp queue length check is enabled.
