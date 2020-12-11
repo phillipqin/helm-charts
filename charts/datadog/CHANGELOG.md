@@ -2,7 +2,7 @@
 
 ## 2.6.5
 
-* Remove the cluster-id configmap mount for process-agent
+* Remove the cluster-id configmap mount for process-agent. This requires an Agent version >= 7.25 and a Cluster Agent >= 1.11
 
 ## 2.6.4
 
