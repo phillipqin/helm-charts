@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+
+* Update the default Datadog Operator version to v0.5.0
+* Support configuring the secret backend command arguments (requires Datadog Operator v0.5.0+)
+
 ## 0.4.0
 
 * BREAKING CHANGES
