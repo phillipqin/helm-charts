@@ -3,6 +3,30 @@
 ## 2.7.0
 
 * Remove the cluster-id configmap mount for process-agent. This requires an Agent version >= 7.25 and a Cluster Agent >= 1.11
+## 2.6.10
+
+* Allow cluster-agent to access apps/daemonsets when admissionController is enabled.
+
+## 2.6.9
+
+* Add `/tmp` in Agent POD as an emptyDir to allow VOLUME removal from Agent Dockerfile
+* Clarify documentation of `datadog.dogstatsd.nonLocalTraffic`
+
+## 2.6.8
+
+* Fix `helm lint` by renaming YAML files lacking metadata info.
+
+## 2.6.7
+
+* Change the default agent version to `7.24.1`
+
+## 2.6.6
+
+* Add `agents.containers.systemProbe.securityContext` option.
+
+## 2.6.5
+
+* Make sure all agents are rolled out on API key update and the Cluster agents on Application key update.
 
 ## 2.6.4
 
