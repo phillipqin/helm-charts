@@ -1,6 +1,6 @@
 # Datadog changelog
 
-## 2.6.5
+## 2.7.0
 
 * Remove the cluster-id configmap mount for process-agent. This requires an Agent version >= 7.25 and a Cluster Agent >= 1.11
 
