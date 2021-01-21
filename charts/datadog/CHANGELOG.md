@@ -1,5 +1,9 @@
 # Datadog changelog
 
+## 2.9.9
+
+* Adds `systemProbe.enableRuntimeCompiler` and `systemprobe.runtimeCompilerOutputDir` to configure eBPF runtime compiler in the system-probe.
+
 ## 2.9.8
 
 * Make pod collection for the Kubernetes Explorer work with an external Cluster Agent deployment.

@@ -51,6 +51,12 @@
     path: /usr/src
   name: src
 {{- end }}
+{{- if .Values.datadog.systemProbe.enableRuntimeCompiler }}
+- hostPath:
+    path: {{ .Values.datadog.systemProbe.runtimeCompilerOutputDir }}
+    type: DirectoryOrCreate
+  name: runtime-compiler-output-dir
+{{- end }}
 {{- end }}
 {{- if or .Values.datadog.processAgent.enabled (eq (include "should-enable-system-probe" .) "true") (eq (include "should-enable-security-agent" .) "true") }}
 - hostPath:
