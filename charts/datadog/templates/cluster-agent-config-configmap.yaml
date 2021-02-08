@@ -1,4 +1,4 @@
-{{- if .Values.clusterAgent.datadog_cluster_yaml }}
+{{- if eq (include "should-mount-datadog-cluster-yaml" .) "true" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -17,5 +17,12 @@ metadata:
     checksum/clusteragent-config: {{ tpl (toYaml .Values.clusterAgent.datadog_cluster_yaml) . | sha256sum }}
 data:
   datadog-cluster.yaml: |
+  {{- if .Values.clusterAgent.datadog_cluster_yaml }}
 {{ tpl (toYaml .Values.clusterAgent.datadog_cluster_yaml) . | indent 4 }}
+  {{- end }}
+  {{- if .Values.datadog.prometheusScrape.additionalConfigs }}
+    prometheus_scrape:
+      checks:
+{{ tpl (toYaml .Values.datadog.prometheusScrape.additionalConfigs) . | indent 6 }}
+  {{- end }}
 {{- end }}

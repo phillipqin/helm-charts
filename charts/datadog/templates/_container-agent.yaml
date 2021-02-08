@@ -87,6 +87,10 @@
       value: "clusterchecks endpointschecks"
     {{- end }}
     {{- end }}
+    {{- if .Values.datadog.prometheusScrape.enabled }}
+    - name: DD_PROMETHEUS_SCRAPE_ENABLED
+      value: "true"
+    {{- end }}
 {{- if .Values.agents.containers.agent.env }}
 {{ toYaml .Values.agents.containers.agent.env | indent 4 }}
 {{- end }}
@@ -112,7 +116,7 @@
     - name: runtimesocket
       mountPath: {{ template "datadog.dockerOrCriSocketPath" . }}
     {{- end }}
-    {{- if .Values.agents.useConfigMap }}
+    {{- if eq (include "should-mount-datadog-yaml" .) "true" }}
     - name: {{ template "datadog.fullname" . }}-datadog-yaml
       mountPath: {{ template "datadog.confPath" . }}/datadog.yaml
       subPath: datadog.yaml

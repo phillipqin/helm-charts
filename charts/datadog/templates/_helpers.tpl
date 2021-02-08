@@ -219,3 +219,36 @@ true
 false
 {{- end -}}
 {{- end -}}
+
+{{/*
+Return true if we need to define custom prometheus check configurations.
+*/}}
+{{- define "should-add-additional-prometheus-configs" -}}
+{{- if and .Values.datadog.prometheusScrape.enabled .Values.datadog.prometheusScrape.additionalConfigs -}}
+true
+{{- else -}}
+false
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if we need to mount the datadog.yaml config file onto the node Agent.
+*/}}
+{{- define "should-mount-datadog-yaml" -}}
+{{- if or (.Values.agents.useConfigMap) (eq (include "should-add-additional-prometheus-configs" .) "true") -}}
+true
+{{- else -}}
+false
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if we need to mount the datadog-cluster.yaml config file onto the Cluster Agent.
+*/}}
+{{- define "should-mount-datadog-cluster-yaml" -}}
+{{- if or (.Values.clusterAgent.datadog_cluster_yaml) (eq (include "should-add-additional-prometheus-configs" .) "true") -}}
+true
+{{- else -}}
+false
+{{- end -}}
+{{- end -}}

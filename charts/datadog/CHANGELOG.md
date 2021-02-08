@@ -1,5 +1,9 @@
 # Datadog changelog
 
+## 2.8.4
+
+* Support configuring Prometheus Autodiscovery. (Requires Datadog Agent 7/6.26+ and Datadog Cluster Agent 1.11+).
+
 ## 2.8.3
 
 * Fix potential duplicate `DD_KUBERNETES_KUBELET_TLS_VERIFY` env var due to new parameter `kubelet.tlsVerify`. Parameter has now 3 states and env var won't be added if not set, improving backward compatibility.

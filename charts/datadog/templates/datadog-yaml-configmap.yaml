@@ -1,4 +1,4 @@
-{{- if .Values.agents.useConfigMap }}
+{{- if eq (include "should-mount-datadog-yaml" .) "true" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -47,5 +47,10 @@ data:
     # Enable java cgroup memory awareness (agent version < 6.15)
     jmx_use_cgroup_memory_limit: true
     {{ end }}
+  {{- end }}
+  {{- if .Values.datadog.prometheusScrape.additionalConfigs }}
+    prometheus_scrape:
+      checks:
+{{ tpl (toYaml .Values.datadog.prometheusScrape.additionalConfigs) . | indent 6 }}
   {{- end }}
 {{- end }}

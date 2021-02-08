@@ -360,6 +360,25 @@ datadog:
               "k8s:io.kubernetes.pod.namespace": kube-system
               "k8s:k8s-app": kube-dns
 
+  ## Configure prometheus scraping autodiscovery (TODO: Add documentation link)
+  prometheusScrape:
+    # datadog.prometheusScrape.enabled -- Enable autodiscovering pods and services exposing prometheus metrics.
+    enabled: false
+    # datadog.prometheusScrape.serviceEndpoints -- Enable generating dedicated checks for service endpoints.
+    serviceEndpoints: false
+    # datadog.prometheusScrape.additionalConfigs -- Allows adding advanced prometheus check configurations with custom discovery rules.
+    additionalConfigs: []
+      # -
+      #   configurations:
+      #   - timeout: 5
+      #     send_distribution_buckets: true
+      #   autodiscovery:
+      #     kubernetes_container_names:
+      #       - my-prometheus-app
+      #     kubernetes_annotations:
+      #       include:
+      #         - prometheus.io/scrape_custom_label: "true"
+
 ## This is the Datadog Cluster Agent implementation that handles cluster-wide
 ## metrics more cleanly, separates concerns for better rbac, and implements
 ## the external metrics API so you can autoscale HPAs based on datadog metrics

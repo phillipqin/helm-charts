@@ -135,7 +135,7 @@ spec:
         configMap:
           name: {{ template "datadog.fullname" . }}-checksd
       {{- end }}
-      {{- if .Values.agents.useConfigMap }}
+      {{- if eq (include "should-mount-datadog-yaml" .) "true" }}
       - name: {{ template "datadog.fullname" . }}-datadog-yaml
         configMap:
           name: {{ template "datadog.fullname" . }}-datadog-yaml
