@@ -90,7 +90,7 @@ rules:
   - "get"
   - "watch"
 {{- end }}
-{{- if .Values.datadog.orchestratorExplorer.enabled }}
+{{- if eq (include "should-enable-k8s-resource-monitoring" .) "true" }}
 - apiGroups:  # to get the kube-system namespace UID and generate a cluster ID
   - ""
   resources:
@@ -149,7 +149,7 @@ rules:
   resources: ["jobs", "cronjobs"]
   verbs: ["get"]
 - apiGroups: ["apps"]
-  resources: ["statefulsets", "replicasets", "deployments"]
+  resources: ["statefulsets", "replicasets", "deployments", "daemonsets"]
   verbs: ["get"]
 {{- end }}
 {{- if .Values.datadog.securityAgent.compliance.enabled }}
@@ -182,6 +182,14 @@ rules:
   verbs:
   - list
 {{- end }}
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+  resourceNames:
+  - {{ template "datadog.fullname" . }}-cluster-agent
 ---
 apiVersion: {{ template "rbac.apiVersion" . }}
 kind: ClusterRoleBinding
@@ -233,7 +241,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
     app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
     app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-  name: {{ template "datadog.fullname" . }}-cluster-agent:system:auth-delegator
+  name: {{ template "datadog.fullname" . }}-cluster-agent-system-auth-delegator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

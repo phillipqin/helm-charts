@@ -11,6 +11,13 @@ fullnameOverride:  # ""
 # targetSystem -- Target OS for this deployment (possible values: linux, windows)
 targetSystem: "linux"
 
+# registry -- Registry to use for all Agent images (default gcr.io)
+## Currently we offer Datadog Agent images on:
+## GCR - use gcr.io/datadoghq (default)
+## DockerHub - use docker.io/datadog
+## AWS - use public.ecr.aws/datadog
+registry: gcr.io/datadoghq
+
 datadog:
   # datadog.apiKey -- Your Datadog API key
   # ref: https://app.datadoghq.com/account/settings#agent/kubernetes
@@ -75,7 +82,7 @@ datadog:
   ## Autodiscovery via Kube Service annotations is automatically enabled
   clusterChecks:
     # datadog.clusterChecks.enabled -- Enable the Cluster Checks feature on both the cluster-agents and the daemonset
-    enabled: false
+    enabled: true
 
   # datadog.nodeLabelsAsTags -- Provide a mapping of Kubernetes Node Labels to Datadog Tags
   nodeLabelsAsTags: {}
@@ -99,6 +106,17 @@ datadog:
   tags: []
   #   - "<KEY_1>:<VALUE_1>"
   #   - "<KEY_2>:<VALUE_2>"
+
+  # kubelet configuration
+  kubelet:
+    # datadog.kubelet.host -- Override kubelet IP
+    host:
+      valueFrom:
+        fieldRef:
+          fieldPath: status.hostIP
+    # datadog.kubelet.tlsVerify -- Toggle kubelet TLS verification
+    # @default -- true
+    tlsVerify:  # false
 
   ## dogstatsd configuration
   ## ref: https://docs.datadoghq.com/agent/kubernetes/dogstatsd/
@@ -145,16 +163,16 @@ datadog:
     ## See https://docs.datadoghq.com/developers/dogstatsd/unix_socket/
     useHostPID: false
 
-    # datadog.dogstatsd.nonLocalTraffic -- Enable this to make each node accept non-local statsd traffic
+    # datadog.dogstatsd.nonLocalTraffic -- Enable this to make each node accept non-local statsd traffic (from outside of the pod)
     ## ref: https://github.com/DataDog/docker-dd-agent#environment-variables
-    nonLocalTraffic: false
+    nonLocalTraffic: true
 
   # datadog.collectEvents -- Enables this to start event collection from the kubernetes API
   ## ref: https://docs.datadoghq.com/agent/kubernetes/#event-collection
-  collectEvents: false
+  collectEvents: true
 
   # datadog.leaderElection -- Enables leader election mechanism for event collection
-  leaderElection: false
+  leaderElection: true
 
   # datadog.leaderLeaseDuration -- Set the lease time for leader election in second
   leaderLeaseDuration:  # 60
@@ -247,7 +265,6 @@ datadog:
 
     # datadog.processAgent.processCollection -- Set this to true to enable process collection in process monitoring agent
     ## Requires processAgent.enabled to be set to true to have any effect
-
     processCollection: false
 
   ## Enable systemProbe agent and provide custom configs
@@ -283,10 +300,10 @@ datadog:
     collectDNSStats: false
 
   orchestratorExplorer:
-    # datadog.orchestratorExplorer.enabled -- Set this to true to enable the orchestrator explorer
+    # datadog.orchestratorExplorer.enabled -- Set this to false to disable the orchestrator explorer
     ## This requires processAgent.enabled and clusterAgent.enabled to be set to true
     ## ref: TODO - add doc link
-    enabled: false
+    enabled: true
 
     # datadog.orchestratorExplorer.container_scrubbing -- Enable the scrubbing of containers in the kubernetes resource YAML for sensitive information
     ## The container scrubbing is taking significant resources during data collection.
@@ -348,16 +365,19 @@ datadog:
 ## the external metrics API so you can autoscale HPAs based on datadog metrics
 ## ref: https://docs.datadoghq.com/agent/kubernetes/cluster/
 clusterAgent:
-  # clusterAgent.enabled -- Set this to true to enable Datadog Cluster Agent
-  enabled: false
+  # clusterAgent.enabled -- Set this to false to disable Datadog Cluster Agent
+  enabled: true
 
   ## Define the Datadog Cluster-Agent image to work with
   image:
-    # clusterAgent.image.repository -- Cluster Agent image repository to use
-    repository: gcr.io/datadoghq/cluster-agent
+    # clusterAgent.image.name -- Cluster Agent image name to use (relative to `registry`)
+    name: cluster-agent
 
     # clusterAgent.image.tag -- Cluster Agent image tag to use
-    tag: 1.9.1
+    tag: 1.10.0
+
+    # clusterAgent.image.repository -- Override default registry + image.name for Cluster Agent
+    repository:
 
     # clusterAgent.image.pullPolicy -- Cluster Agent image pullPolicy
     pullPolicy: IfNotPresent
@@ -390,6 +410,12 @@ clusterAgent:
     # clusterAgent.rbac.serviceAccountName -- Specify service account name to use (usually pre-existing, created if create is true)
     serviceAccountName: default
 
+  ## Provide Cluster Agent PodSecurityPolicy configuration
+  podSecurity:
+    podSecurityPolicy:
+      # clusterAgent.podSecurity.podSecurityPolicy.create -- If true, create a PodSecurityPolicy resource for Cluster Agent pods
+      create: false
+
   # Enable the metricsProvider to be able to scale based on metrics in Datadog
   metricsProvider:
     # clusterAgent.metricsProvider.enabled -- Set this to true to enable Metrics Provider
@@ -400,7 +426,7 @@ clusterAgent:
     wpaController: false
 
     # clusterAgent.metricsProvider.useDatadogMetrics -- Enable usage of DatadogMetric CRD to autoscale on arbitrary Datadog queries
-    ## NOTE: You need to install the `DatadogMetric` CRD before
+    ## NOTE: It will install DatadogMetrics CRD automatically (it may conflict with previous installations)
     useDatadogMetrics: false
 
     # clusterAgent.metricsProvider.createReaderRbac -- Create `external-metrics-reader` RBAC automatically (to allow HPA to read data from Cluster Agent)
@@ -551,14 +577,16 @@ agents:
 
   ## Define the Datadog image to work with
   image:
-    # agents.image.repository -- Datadog Agent image repository to use
-    ## use "gcr.io/datadoghq/agent" for Datadog Agent 7
-    ## use "gcr.io/datadoghq/dogstatsd" for Standalone Datadog Agent DogStatsD 7
-    repository: gcr.io/datadoghq/agent
+    # agents.image.name -- Datadog Agent image name to use (relative to `registry`)
+    ## use "dogstatsd" for Standalone Datadog Agent DogStatsD 7
+    name: agent
 
     # agents.image.tag -- Define the Agent version to use
     ## Use 7-jmx to enable jmx fetch collection
-    tag: 7.23.1
+    tag: 7.25.0
+
+    # agents.image.repository -- Override default registry + image.name for Agent
+    repository:
 
     # agents.image.doNotCheckTag -- Skip the version<>chart compatibility check
     ## By default, the version passed in agents.image.tag is checked
@@ -634,6 +662,7 @@ agents:
     # agents.podSecurity.apparmorProfiles -- Allowed apparmor profiles
     apparmorProfiles:
       - "runtime/default"
+      - "unconfined"
 
     apparmor:
       # agents.podSecurity.apparmor.enabled -- If true, enable apparmor enforcement
@@ -682,6 +711,9 @@ agents:
       # agents.containers.agent.securityContext -- Allows you to overwrite the default container SecurityContext for the agent container.
       securityContext: {}
 
+      # agents.containers.agent.ports -- Allows to specify extra ports (hostPorts for instance) for this container
+      ports: []
+
     processAgent:
       # agents.containers.processAgent.env -- Additional environment variables for the process-agent container
       env: []
@@ -701,6 +733,9 @@ agents:
 
       # agents.containers.processAgent.securityContext -- Allows you to overwrite the default container SecurityContext for the process-agent container.
       securityContext: {}
+
+      # agents.containers.processAgent.ports -- Allows to specify extra ports (hostPorts for instance) for this container
+      ports: []
 
     traceAgent:
       # agents.containers.traceAgent.env -- Additional environment variables for the trace-agent container
@@ -728,6 +763,9 @@ agents:
       # agents.containers.traceAgent.securityContext -- Allows you to overwrite the default container SecurityContext for the trace-agent container.
       securityContext: {}
 
+      # agents.containers.traceAgent.ports -- Allows to specify extra ports (hostPorts for instance) for this container
+      ports: []
+
     systemProbe:
       # agents.containers.systemProbe.env -- Additional environment variables for the system-probe container
       env: []
@@ -744,6 +782,16 @@ agents:
       #  limits:
       #    cpu: 100m
       #    memory: 200Mi
+
+      # agents.containers.systemProbe.securityContext -- Allows you to overwrite the default container SecurityContext for the system-probe container.
+      securityContext:
+        privileged: false
+        capabilities:
+          add: ["SYS_ADMIN", "SYS_RESOURCE", "SYS_PTRACE", "NET_ADMIN", "NET_BROADCAST", "IPC_LOCK"]
+
+      # agents.containers.systemProbe.ports -- Allows to specify extra ports (hostPorts for instance) for this container
+      ports: []
+
     securityAgent:
       # agents.containers.securityAgent.env -- Additional environment variables for the security-agent container
       env:
@@ -760,6 +808,9 @@ agents:
       #  limits:
       #    cpu: 100m
       #    memory: 200Mi
+
+      # agents.containers.securityAgent.ports -- Allows to specify extra ports (hostPorts for instance) for this container
+      ports: []
 
     initContainers:
       # agents.containers.initContainers.resources -- Resource requests and limits for the init containers
@@ -876,13 +927,15 @@ clusterChecksRunner:
 
   ## Define the Datadog image to work with.
   image:
-    # clusterChecksRunner.image.repository -- Datadog Agent image repository to use
-    ## use "gcr.io/datadoghq/agent" for Datadog Agent 7
-    repository: gcr.io/datadoghq/agent
+    # clusterChecksRunner.image.name -- Datadog Agent image name to use (relative to `registry`)
+    name: agent
 
     # clusterChecksRunner.image.tag -- Define the Agent version to use
     ## Use 7-jmx to enable jmx fetch collection
-    tag: 7.23.1
+    tag: 7.25.0
+
+    # clusterChecksRunner.image.repository -- Override default registry + image.name for Cluster Check Runners
+    repository:
 
     # clusterChecksRunner.image.pullPolicy -- Datadog Agent image pull policy
     pullPolicy: IfNotPresent
@@ -1021,6 +1074,9 @@ clusterChecksRunner:
 
   # clusterChecksRunner.securityContext -- Allows you to overwrite the default PodSecurityContext on the clusterchecks pods.
   securityContext: {}
+
+  # clusterChecksRunner.ports -- Allows to specify extra ports (hostPorts for instance) for this container
+  ports: []
 
 datadog-crds:
   crds:

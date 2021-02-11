@@ -1,6 +1,6 @@
 {{- define "container-agent" -}}
 - name: agent
-  image: "{{ .Values.agents.image.repository }}:{{ .Values.agents.image.tag }}"
+  image: "{{ include "image-path" (dict "root" .Values "image" .Values.agents.image) }}"
   imagePullPolicy: {{ .Values.agents.image.pullPolicy }}
   command: ["agent", "run"]
   {{- if .Values.agents.containers.agent.securityContext }}
@@ -16,6 +16,9 @@
     {{- end }}
     name: dogstatsdport
     protocol: UDP
+{{- if .Values.agents.containers.agent.ports }}
+{{ toYaml .Values.agents.containers.agent.ports | indent 2 }}
+{{- end }}
 {{- if .Values.datadog.envFrom }}
   envFrom:
 {{ toYaml .Values.datadog.envFrom | indent 4 }}
@@ -75,7 +78,7 @@
     - name: DD_DOGSTATSD_SOCKET
       value: {{ .Values.datadog.dogstatsd.socketPath | quote }}
     {{- end }}
-    {{- if .Values.datadog.clusterChecks.enabled }}
+    {{- if and .Values.clusterAgent.enabled .Values.datadog.clusterChecks.enabled }}
     {{- if .Values.clusterChecksRunner.enabled }}
     - name: DD_EXTRA_CONFIG_PROVIDERS
       value: "endpointschecks"
@@ -93,6 +96,9 @@
       subPath: install_info
       mountPath: /etc/datadog-agent/install_info
       readOnly: true
+    - name: tmpdir
+      mountPath: /tmp
+      readOnly: false
     {{- end }}
     - name: config
       mountPath: {{ template "datadog.confPath" . }}

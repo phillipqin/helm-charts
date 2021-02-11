@@ -1,5 +1,88 @@
 # Datadog changelog
 
+## 2.8.3
+
+* Fix potential duplicate `DD_KUBERNETES_KUBELET_TLS_VERIFY` env var due to new parameter `kubelet.tlsVerify`. Parameter has now 3 states and env var won't be added if not set, improving backward compatibility.
+* Fix activation of Cluster Checks while Cluster Agent is disabled.
+* Change default value for `clusterAgent.metricsProvider.useDatadogMetrics` from `true` to `false` as it may trigger CRD ownership issues in several situations.
+
+## 2.8.2
+
+* Open port 5000/TCP for ingress on cluster agent for Prometheus check from the agent.
+
+## 2.8.1
+
+* Fix `datadog.kubelet.tlsVerify` value when set to `false`
+
+## 2.8.0
+
+* Enable the orchestrator explorer by default.
+
+## 2.7.2
+
+* Add a new fields `datadog.kubelet.host` (to override `DD_KUBERNETES_KUBELET_HOST`) and `datadog.kubelet.tlsVerify` (to toggle kubelet TLS verification)
+
+## 2.7.1
+
+* Open port 8000/TCP for ingress on cluster agent for Admission Controller communication.
+
+## 2.7.0
+
+* Changes default values to activate a maximum of built-in features to ease configuration.
+  Notable changes:
+  - Cluster Agent, cluster checks and event collection are activated by default
+  - DatadogMetrics CRD usage is activated by default if ExternalMetrics are used
+  - Dogstatsd non-local traffic is activated by default (hostPort usage is not)
+* Bump Agent version to `7.25.0` and Cluster Agent version to `1.10.0`
+* Introduce `.registry` parameter to quickly change registry for all Datadog images. Image name is retrieved from `.image.name`, however setting `.image.repository` still allows to override per image, ensuring backward compatibility
+
+## 2.6.15
+
+* Add `ports` options to all Agent containers to allow users to add any binding they'd like for integrations
+
+## 2.6.14
+
+* Opens port 6443/TCP on kube-state-metrics netpol.
+
+## 2.6.13
+
+* Opens ports 6443/TCP and 53/UDP for egress on cluster agent.
+* Adds PodSecurityPolicy support for Cluster Agents.
+
+## 2.6.12
+
+* Mount `/etc/passwd` as `readOnly` in the `process-agent`.
+
+## 2.6.11
+
+* Adds `unconfined` as a default value for `agents.podSecurity.apparmorProfiles`. It now aligns with `datadog.systemProbe.apparmor` default value.
+* Updates `hostPID` for PodSecurityPolicy, bringing it in line with SCC.
+
+## 2.6.10
+
+* Allow cluster-agent to access apps/daemonsets when admissionController is enabled.
+
+## 2.6.9
+
+* Add `/tmp` in Agent POD as an emptyDir to allow VOLUME removal from Agent Dockerfile
+* Clarify documentation of `datadog.dogstatsd.nonLocalTraffic`
+
+## 2.6.8
+
+* Fix `helm lint` by renaming YAML files lacking metadata info.
+
+## 2.6.7
+
+* Change the default agent version to `7.24.1`
+
+## 2.6.6
+
+* Add `agents.containers.systemProbe.securityContext` option.
+
+## 2.6.5
+
+* Make sure all agents are rolled out on API key update and the Cluster agents on Application key update.
+
 ## 2.6.4
 
 * Fix agent container volumeMounts when oom kill check or tcp queue length check is enabled.

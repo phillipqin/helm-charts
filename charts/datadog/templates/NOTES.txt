@@ -147,7 +147,7 @@ Please note that duplicate file names may have conflicted during
 the merge. In that case, the confd entry will take precedence.
 {{- end }}
 
-{{- if eq .Values.agents.image.repository "datadog/docker-dd-agent" }}
+{{- if eq .Values.agents.image.name "docker-dd-agent" }}
 
 ######################################################################
 ####               ERROR: Unsupported agent version               ####
@@ -191,4 +191,14 @@ More information about this change: https://github.com/DataDog/helm-charts/pull/
 You are using datadog.systemProbe.enabled which has been deprecated in favor using one of networkMonitoring.enabled, systemProbe.enableTCPQueueLength, systemProbe.enableOOMKill, or securityAgent.runtime.enabled.
 More information about this change: https://github.com/DataDog/helm-charts/pull/101
 
+{{- end }}
+
+{{- if (and .Values.datadog.orchestratorExplorer.enabled (not .Values.clusterAgent.enabled ))}}
+
+#################################################################
+####               WARNING: Configuration notice             ####
+#################################################################
+
+You are using datadog.orchestratorExplorer.enabled but you disabled the cluster agent. This configuration is unsupported and Kubernetes resource monitoring has been turned off.
+To enable it please set clusterAgent.enabled to 'true'.
 {{- end }}

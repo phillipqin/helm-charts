@@ -17,9 +17,10 @@ spec:
     - Ingress
     - Egress
   ingress:
-  - # Ingress from the node agents (for the metadata provider)
+  - # Ingress from the node agents (for the metadata provider and prometheus check)
     ports:
       - port: 5005
+      - port: 5000
     from:
       - podSelector:
           matchLabels:
@@ -33,6 +34,10 @@ spec:
           matchLabels:
             app: {{ template "datadog.fullname" . }}-clusterchecks
 {{- end }}
+{{- if .Values.clusterAgent.admissionController.enabled }}
+  - ports:
+      - port: 8000
+{{- end }}
 {{- if .Values.clusterAgent.metricsProvider.enabled }}
   - # Ingress from API server for external metrics
     ports:
@@ -42,6 +47,10 @@ spec:
     - # Egress to
       # * Datadog intake
       # * Kube API server
+      # * DNS
       ports:
         - port: 443
+        - port: 6443
+        - port: 53
+          protocol: UDP
 {{- end}}

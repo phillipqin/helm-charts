@@ -1,6 +1,6 @@
 {{- define "container-security-agent" -}}
 - name: security-agent
-  image: "{{ .Values.agents.image.repository }}:{{ .Values.agents.image.tag }}"
+  image: "{{ include "image-path" (dict "root" .Values "image" .Values.agents.image) }}"
   imagePullPolicy: {{ .Values.agents.image.pullPolicy }}
   securityContext:
     capabilities:
@@ -8,6 +8,10 @@
   command: ["security-agent", "start", "-c={{ template "datadog.confPath" . }}/datadog.yaml"]
   resources:
 {{ toYaml .Values.agents.containers.securityAgent.resources | indent 4 }}
+{{- if .Values.agents.containers.securityAgent.ports }}
+  ports:
+{{ toYaml .Values.agents.containers.securityAgent.ports | indent 2 }}
+{{- end }}
 {{- if .Values.datadog.envFrom }}
   envFrom:
 {{ toYaml .Values.datadog.envFrom | indent 4 }}
@@ -43,6 +47,9 @@
     - name: config
       mountPath: {{ template "datadog.confPath" . }}
     {{- if eq .Values.targetSystem "linux" }}
+    - name: tmpdir
+      mountPath: /tmp
+      readOnly: false
     - name: runtimesocketdir
       mountPath: {{ print "/host/" (dir (include "datadog.dockerOrCriSocketPath" .)) | clean }}
       readOnly: true
