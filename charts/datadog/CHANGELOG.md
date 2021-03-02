@@ -1,5 +1,9 @@
 # Datadog changelog
 
+## 2.9.9
+
+* Allow system-probe container to send flares by adding main agent config file to container.
+
 ## 2.9.8
 
 * Make pod collection for the Kubernetes Explorer work with an external Cluster Agent deployment.
